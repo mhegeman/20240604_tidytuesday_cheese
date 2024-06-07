@@ -3,8 +3,6 @@ library(janitor)
 library(maps)
 
 
-
-
 # Read data ---------------------------------------------------------------
 
 raw_cheese <- read_csv("cheeses.csv") %>%
@@ -21,12 +19,22 @@ country_multiple <- raw_cheese %>%
 
 country_single <- raw_cheese %>%
   select(row_id, country) %>%
-  filter(!str_detect(country, ","))
+  filter(!str_detect(country, ",")) %>%
+  mutate(country = if_else(country == "Mexico and Carribean", "Mexico", country))
 
 country_cheese <- bind_rows(country_single, country_multiple) %>%
   distinct() %>%
+  mutate(country = case_when(
+    country == "England" ~ "United Kingdom",
+    country == "Scotland" ~ "United Kingdom",
+    country == "Wales" ~ "United Kingdom",
+    country == "Great Britain" ~ "United Kingdom",
+    country == "Holland" ~ "Netherlands",
+    country == "Mexico and Caribbean" ~ "Mexico",
+    TRUE ~ country
+  )) %>%
   arrange(row_id)
-
+rm(country_multiple, country_single)
 
 # Clean data ---------------------------------------------------------------
 
@@ -53,10 +61,10 @@ world_map <- map_data("world") %>%
   ))
 
 cheese_map <- world_map %>%
-  inner_join(cheese_by_country, by = c("region" = "country"))
+  left_join(cheese_by_country, by = c("region" = "country"))
 
 no_match <- cheese_by_country %>%
-  filter(!country %in% cheese_map$region)
+  filter(!country %in% world_map$region)
 
 cheese_map_plot <- ggplot(cheese_map, aes(x = long, y = lat, group = group)) +
   geom_polygon(aes(fill = count), color = "white") +
@@ -70,8 +78,4 @@ cheese_map_plot <- ggplot(cheese_map, aes(x = long, y = lat, group = group)) +
 
 plot(cheese_map_plot)
 
-# What are the top ten cheese producing countries
-cheese_by_country %>%
-  top_n(10, count) %>%
-  arrange(desc(count)) %>%
-  knitr::kable()
+
