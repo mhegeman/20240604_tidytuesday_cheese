@@ -8,6 +8,9 @@ library(maps)
 raw_cheese <- read_csv("cheeses.csv") %>%
   rowid_to_column("row_id")
 
+
+# Clean data --------------------------------------------------------------
+
 # there are multiple values in the country column, so we need to split them and then unnest them
 
 country_multiple <- raw_cheese %>%
@@ -36,46 +39,74 @@ country_cheese <- bind_rows(country_single, country_multiple) %>%
   arrange(row_id)
 rm(country_multiple, country_single)
 
-# Clean data ---------------------------------------------------------------
-
-clean_cheese <- raw_cheese %>%
+clean_cheese_country <- raw_cheese %>%
   select(-country) %>%
   left_join(country_cheese, by = "row_id") %>%
   select(-row_id) %>%
   clean_names()
 
+# there are multiple values in the texture column, so we need to split them and then unnest them
 
-cheese_by_country <- clean_cheese %>%
+texture_multiple <- raw_cheese %>%
+  select(row_id, texture) %>%
+  filter(str_detect(texture, ",")) %>%
+  separate_rows(texture, sep = ",") %>%
+  mutate(texture = str_trim(texture)) %>%
+  distinct()
+
+texture_single <- raw_cheese %>%
+  select(row_id, texture) %>%
+  filter(!str_detect(texture, ","))
+
+texture_cheese <- bind_rows(texture_single, texture_multiple) %>%
+  distinct() %>%
+  arrange(row_id)
+
+rm(texture_multiple, texture_single)
+
+clean_cheese_texture <- raw_cheese %>%
+  select(-texture) %>%
+  left_join(texture_cheese, by = "row_id") %>%
+  select(-row_id) %>%
+  clean_names()
+
+
+
+# cheese table ------------------------------------------------------------
+
+# cheese_milk <- clean_cheese %>%
+#   group_by(milk) %>%
+#   summarise(
+#     count = n()
+#   ) %>%
+#   arrange(desc(count))
+
+
+
+# cheese texture ----------------------------------------------------------
+
+cheese_texture <- clean_cheese_texture %>%
+  group_by(texture) %>%
+  summarise(
+    count = n()
+  ) %>%
+  arrange(desc(count))
+
+
+
+
+
+# cheese map --------------------------------------------------------------
+
+
+cheese_by_country <- clean_cheese_country %>%
   group_by(country) %>%
   summarise(
     count = n()
   ) %>%
   arrange(desc(count))
 
-world_map <- map_data("world") %>%
-  mutate(region = if_else(!is.na(subregion) & region == "United Kingdom", subregion, region)) %>%
-  mutate(region = case_when(
-    region == "USA" ~ "United States",
-    region == "UK" ~ "United Kingdom",
-    TRUE ~ region
-  ))
 
-cheese_map <- world_map %>%
-  left_join(cheese_by_country, by = c("region" = "country"))
 
-no_match <- cheese_by_country %>%
-  filter(!country %in% world_map$region)
-
-cheese_map_plot <- ggplot(cheese_map, aes(x = long, y = lat, group = group)) +
-  geom_polygon(aes(fill = count), color = "white") +
-  coord_fixed(1.3) +
-  theme_minimal() +
-  scale_fill_viridis_c() +
-  labs(
-    title = "Cheese by Country",
-    fill = "Cheese Count"
-  )
-
-plot(cheese_map_plot)
 
 
