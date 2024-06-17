@@ -8,6 +8,10 @@ output: github_document
 knitr::opts_chunk$set(
   collapse = TRUE,
   echo = FALSE,
+  messages = FALSE,
+  # results = FALSE,
+  warnings = FALSE,
+  # include = FALSE,
   comment = "#>"
 )
 library(tidyverse)
@@ -28,13 +32,17 @@ Cheese.com has information on over 1,000 cheeses from around the world. This dat
 
 Tidy Tuesday provided two data tables to work with: `cheeses.csv` and `cheese_details.csv`. `janitor::compare_df_cols()` was used to compare the two data sets and determine that `cheese_details.csv` didn't have any additional information that I wanted to use that weren't already present in `cheeses.csv`.
 
-```{r}
+```{r label="read data", include=FALSE}
 raw_cheese <- read_csv("cheeses.csv") %>%
   rowid_to_column("row_id")
 
 raw_cheese_details <- read_csv("cheese_details.csv") %>%
   rowid_to_column("row_id")
 
+
+```
+
+```{r}
 compare_df_cols(raw_cheese, raw_cheese_details) %>%
   gt() %>% 
   cols_label(column_name = "Column Name",
@@ -47,7 +55,6 @@ compare_df_cols(raw_cheese, raw_cheese_details) %>%
 
 
 ```
-
 
 
 ## Cheeses of the World
