@@ -50,7 +50,8 @@ compare_df_cols(raw_cheese, raw_cheese_details) %>%
              raw_cheese_details = "cheese_details.csv") %>% 
   tab_header(title = md("**Comparing Two Dataframes**")) %>% 
   tab_spanner(label = "Data Source", 
-              columns = c(raw_cheese, raw_cheese_details))
+              columns = c(raw_cheese, raw_cheese_details)) %>% 
+  as_raw_html()
 
 
 
