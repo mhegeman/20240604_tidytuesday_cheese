@@ -13,6 +13,7 @@ knitr::opts_chunk$set(
 library(tidyverse)
 library(janitor)
 library(maps)
+library(gt)
 source("R/cheese.R")
 ```
 
@@ -21,9 +22,16 @@ source("R/cheese.R")
 <!-- badges: start -->
 <!-- badges: end -->
 
-This week's Tidy Tuesday dataset is about cheese! 🧀
+This week's Tidy Tuesday data set is about cheese! 🧀
 
-Cheese.com has information on over 1,000 cheeses from around the world. 
+Cheese.com has information on over 1,000 cheeses from around the world. This data set includes information on the name, country of origin, texture, and type of milk used for each cheese.
+
+## Cleaning the dataset
+
+Tidy Tuesday provided two data tables to work with: `cheeses.csv` and `cheese_details.csv`. 
+
+## Cheeses of the World
+
 
 ```{r cheese_map}
 
@@ -36,19 +44,24 @@ world_map <- map_data("world") %>%
   ))
 
 cheese_map <- world_map %>%
-  left_join(cheese_by_country, by = c("region" = "country"))
+  left_join(cheese_by_country, by = c("region" = "country")) 
 
-no_match <- cheese_by_country %>%
-  filter(!country %in% world_map$region)
+
+# no_match <- cheese_by_country %>%
+#   filter(!country %in% world_map$region)
 
 cheese_map_plot <- ggplot(cheese_map, aes(x = long, y = lat, group = group)) +
   geom_polygon(aes(fill = count), color = "white") +
   coord_fixed(1.3) +
+  scale_x_continuous(limits = c(-180, 180)) +
+  scale_y_continuous(limits = c(-60, 90)) +
   theme_minimal() +
   scale_fill_viridis_c() +
   labs(
-    title = "Cheese by Country",
-    fill = "Cheese Count"
+    title = "Numbers of Cheese by Country",
+    fill = "Cheese Count",
+    x = "",
+    y = ""
   )
 
 
@@ -68,6 +81,33 @@ top_five_texture <- cheese_texture %>%
 common_texture_string <- str_c(top_five_texture$texture, collapse = ", ")
 ```
 
+The most common types of descriptors for cheese texture in this data set include `r common_texture_string`. 
+
+```{r texture table}
+
+cheese_texture %>%
+  filter(!is.na(texture)) %>%
+  mutate(texture = str_to_title(texture)) %>%
+  gt() %>% 
+  tab_header(title = md("**Most Popular Cheese Descriptions**"),
+             subtitle = "Number of times each phrase shows up in the data set") %>% 
+  cols_label(texture = "Texture", 
+             count = "Number of References")
+
+```
+
+```{r milk}
+
+cheese_milk %>%
+  filter(!is.na(milk)) %>% 
+  mutate(milk = str_to_title(milk)) %>%
+  gt() %>% 
+  tab_header(title = md("**Most Popular Milk Types**"),
+             subtitle = "Number of cheeses using each milk.") %>% 
+  cols_label(milk = "Milk Type", 
+             count = "Number of Cheeses")
 
 
-The most common types of descriptors for cheese include `r common_texture_string`. 
+```
+
+
