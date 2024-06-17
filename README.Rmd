@@ -60,7 +60,7 @@ compare_df_cols(raw_cheese, raw_cheese_details) %>%
 
 ## Cheeses of the World
 
-I wanted to know how many different cheeses were produced in each country, however the country column in the dataset had anywhere from one to eight countries listed. We need to create a dataframe that lists the country and a single country, so cheeses that have multiple countries listed would lhave multiple rows in the new dataframe. 
+I wanted to know how many different cheeses were produced in each country, however the country column in the dataset had anywhere from one to eight countries listed. We need to create a dataframe that lists the country and a single country, so cheeses that have multiple countries listed would have multiple rows in the new dataframe. 
 
 ```{r cheese production by country}
 
@@ -126,7 +126,8 @@ cheese_texture %>%
   tab_header(title = md("**Most Popular Cheese Descriptions**"),
              subtitle = "Number of times each phrase shows up in the data set") %>% 
   cols_label(texture = "Texture", 
-             count = "Number of References")
+             count = "Number of References")%>% 
+  as_raw_html()
 
 ```
 
@@ -139,7 +140,8 @@ cheese_milk %>%
   tab_header(title = md("**Most Popular Milk Types**"),
              subtitle = "Number of cheeses using each milk.") %>% 
   cols_label(milk = "Milk Type", 
-             count = "Number of Cheeses")
+             count = "Number of Cheeses")%>% 
+  as_raw_html()
 
 
 ```
