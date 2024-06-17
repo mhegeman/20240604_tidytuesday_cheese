@@ -3,10 +3,17 @@ library(janitor)
 library(maps)
 
 
+
+
 # Read data ---------------------------------------------------------------
 
 raw_cheese <- read_csv("cheeses.csv") %>%
   rowid_to_column("row_id")
+
+raw_cheese_details <- read_csv("cheese_details.csv") %>%
+  rowid_to_column("row_id")
+
+x <- compare_df_cols(raw_cheese, raw_cheese_details)
 
 
 # cheese milk ------------------------------------------------------------

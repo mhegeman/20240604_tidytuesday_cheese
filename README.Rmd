@@ -26,11 +26,37 @@ This week's Tidy Tuesday data set is about cheese! 🧀
 
 Cheese.com has information on over 1,000 cheeses from around the world. This data set includes information on the name, country of origin, texture, and type of milk used for each cheese.
 
-## Cleaning the dataset
+Tidy Tuesday provided two data tables to work with: `cheeses.csv` and `cheese_details.csv`. `janitor::compare_df_cols()` was used to compare the two data sets and determine that `cheese_details.csv` didn't have any additional information that I wanted to use that weren't already present in `cheeses.csv`.
 
-Tidy Tuesday provided two data tables to work with: `cheeses.csv` and `cheese_details.csv`. 
+```{r}
+raw_cheese <- read_csv("cheeses.csv") %>%
+  rowid_to_column("row_id")
+
+raw_cheese_details <- read_csv("cheese_details.csv") %>%
+  rowid_to_column("row_id")
+
+compare_df_cols(raw_cheese, raw_cheese_details) %>%
+  gt() %>% 
+  cols_label(column_name = "Column Name",
+             raw_cheese = "cheeses.csv",
+             raw_cheese_details = "cheese_details.csv") %>% 
+  tab_header(title = md("**Comparing Two Dataframes**")) %>% 
+  tab_spanner(label = "Data Source", 
+              columns = c(raw_cheese, raw_cheese_details))
+
+
+
+```
+
+
 
 ## Cheeses of the World
+
+I wanted to know how many different cheeses were produced in each country, however the country column in the dataset had anywhere from one to eight countries listed. We need to create a dataframe that lists the country and a single country, so cheeses that have multiple countries listed would lhave multiple rows in the new dataframe. 
+
+```{r cheese production by country}
+
+```
 
 
 ```{r cheese_map}
